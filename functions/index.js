@@ -7,8 +7,18 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: "https://special-offer-webhooks.firebaseio.com"
 });
-exports.addMessage = functions.https.onRequest(function (req, res) {
-    admin.database().ref('/messages').push({ original: req.query.text }).then(function (snapshot) {
-        res.redirect(303, snapshot.ref);
-    });
+exports.updateOffers = functions.https.onRequest(function (req, res) {
+    admin.database().ref('/special_offers').set(req.body);
+});
+exports.setPlayersOffers = functions.https.onRequest(function (req, res) {
+    var players = req.body['customers'], data = req.body['data'];
+    for (var i = 0; i < players.length; i++) {
+        if (!players[i]['ids']['registered']) {
+            continue;
+        }
+        admin.database().ref('/players').update((_a = {},
+            _a[players[i]['ids']['registered']] = data,
+            _a));
+    }
+    var _a;
 });

@@ -8,8 +8,19 @@ admin.initializeApp({
   databaseURL: "https://special-offer-webhooks.firebaseio.com"
 })
 
-export const addMessage = functions.https.onRequest((req, res) => {
-  admin.database().ref('/messages').push({original: req.query.text}).then(snapshot => {
-    res.redirect(303, snapshot.ref)
-  })
+export const updateOffers = functions.https.onRequest((req, res) => {
+  admin.database().ref('/special_offers').set(req.body)
+})
+
+export const setPlayersOffers = functions.https.onRequest((req, res) => {
+  const players = req.body['customers'], data = req.body['data']
+  for (let i = 0; i < players.length; i++) {
+    if (!players[i]['ids']['registered']) {
+      continue
+    }
+
+    admin.database().ref('/players').update({
+      [players[i]['ids']['registered']]: data
+    })
+  }
 })
